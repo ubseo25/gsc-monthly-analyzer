@@ -20,17 +20,29 @@ Upload your monthly GSC data in **Excel format** with the following columns:
 
 file = st.file_uploader("📂 Upload Excel file", type=["xlsx"])
 
-
-def calc_change(v1, v2):
+def calc_change(v1, v2, is_percentage=False, is_position=False):
     try:
-        v1 = float(str(v1).strip('%'))
-        v2 = float(str(v2).strip('%'))
+        if is_percentage:
+            v1 = float(str(v1).strip('%'))
+            v2 = float(str(v2).strip('%'))
+        else:
+            v1 = float(v1)
+            v2 = float(v2)
+            
+        # Special handling for position 0 (disappeared from rankings)
+        if is_position and v2 == 0:
+            return v1, 0, float('inf'), -100  # Show extreme negative change
+            
         delta = v2 - v1
-        pct = (delta / v1) * 100 if v1 != 0 else 0
-        return round(v1, 2), round(v2, 2), round(delta, 2), round(pct, 1)
+        if is_position:
+            # For positions, improvement is when delta is negative (position number decreased)
+            pct_improvement = ((v1 - v2)/v1) * 100 if v1 != 0 else 0
+        else:
+            pct_improvement = (delta/v1) * 100 if v1 != 0 else 0
+            
+        return round(v1, 2), round(v2, 2), round(delta, 2), round(pct_improvement, 1)
     except:
         return None, None, None, None
-
 
 def ai_impact_logic(clicks1, clicks2, pos1, pos2, ctr1, ctr2, impr1, impr2):
     try:
@@ -40,17 +52,18 @@ def ai_impact_logic(clicks1, clicks2, pos1, pos2, ctr1, ctr2, impr1, impr2):
         ctr2 = float(str(ctr2).strip('%'))
         impr1, impr2 = float(impr1), float(impr2)
 
-        pos_improved = pos2 <= pos1
+        # Consider position 0 as disappeared (bad outcome)
+        pos_disappeared = pos2 == 0
+        pos_improved = pos2 < pos1 and not pos_disappeared
         clicks_dropped = clicks2 < clicks1
         ctr_dropped = ctr2 < ctr1
         impressions_similar_or_up = impr2 >= (0.9 * impr1)
 
-        if pos_improved and clicks_dropped and ctr_dropped and impressions_similar_or_up:
+        if (pos_improved or pos_disappeared) and clicks_dropped and ctr_dropped and impressions_similar_or_up:
             return "🤖 Possible AI Overview impact"
         return "—"
     except:
         return "—"
-
 
 # Main Logic
 if file:
@@ -74,23 +87,27 @@ if file:
             for idx, row in df.iterrows():
                 result = {"URL": row["URL"]}
                 metrics = {
-                    "Clicks": ("Month 1 Clicks", "Month 2 Clicks", True),
-                    "Impressions": ("Month 1 Impr", "Month 2 Impr", True),
-                    "CTR (%)": ("Month 1 CTR", "Month 2 CTR", True),
-                    "Position": ("Month 1 Pos", "Month 2 Pos", False)
+                    "Clicks": ("Month 1 Clicks", "Month 2 Clicks", True, False, False),
+                    "Impressions": ("Month 1 Impr", "Month 2 Impr", True, False, False),
+                    "CTR (%)": ("Month 1 CTR", "Month 2 CTR", True, True, False),
+                    "Position": ("Month 1 Pos", "Month 2 Pos", False, False, True)
                 }
 
-                for label, (col1, col2, higher_is_better) in metrics.items():
-                    v1, v2, delta, pct = calc_change(row[col1], row[col2])
+                for label, (col1, col2, higher_is_better, is_percentage, is_position) in metrics.items():
+                    v1, v2, delta, pct = calc_change(row[col1], row[col2], is_percentage, is_position)
                     result[f"{label} M1"] = v1
                     result[f"{label} M2"] = v2
                     result[f"{label} Δ"] = delta
                     result[f"{label} %"] = pct
                     if v1 is not None:
-                        if higher_is_better:
-                            insight = "📈 Growth" if delta > 0 else "🔻 Drop" if delta < 0 else "➖ No Change"
+                        if is_position:
+                            # Special handling for disappeared URLs (position 0)
+                            if v2 == 0:
+                                insight = "❌ Disappeared"
+                            else:
+                                insight = "📈 Improved" if delta < 0 else "🔻 Declined" if delta > 0 else "➖ No Change"
                         else:
-                            insight = "📉 Improvement" if delta < 0 else "🔺 Decline" if delta > 0 else "➖ No Change"
+                            insight = "📈 Growth" if delta > 0 and higher_is_better else "🔻 Drop" if delta < 0 and higher_is_better else "➖ No Change"
                         result[f"{label} Insight"] = insight
 
                 result["AI Overview"] = ai_impact_logic(
