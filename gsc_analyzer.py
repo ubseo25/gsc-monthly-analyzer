@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import io
+from io import BytesIO
 
 st.set_page_config(page_title="📊 GSC Monthly Analyzer", layout="wide")
 
@@ -52,7 +52,7 @@ def ai_impact_logic(clicks1, clicks2, pos1, pos2, ctr1, ctr2, impr1, impr2):
         return "—"
 
 
-# === Main Logic ===
+# Main Logic
 if file:
     try:
         df = pd.read_excel(file)
@@ -73,7 +73,6 @@ if file:
             # Loop over all URLs
             for idx, row in df.iterrows():
                 result = {"URL": row["URL"]}
-
                 metrics = {
                     "Clicks": ("Month 1 Clicks", "Month 2 Clicks", True),
                     "Impressions": ("Month 1 Impr", "Month 2 Impr", True),
@@ -94,7 +93,6 @@ if file:
                             insight = "📉 Improvement" if delta < 0 else "🔺 Decline" if delta > 0 else "➖ No Change"
                         result[f"{label} Insight"] = insight
 
-                # AI Overview Detection
                 result["AI Overview"] = ai_impact_logic(
                     row["Month 1 Clicks"], row["Month 2 Clicks"],
                     row["Month 1 Pos"], row["Month 2 Pos"],
@@ -109,26 +107,43 @@ if file:
             st.markdown("### 📋 Full URL Analysis Table")
             st.dataframe(results_df, use_container_width=True)
 
+            # === Downloads ===
+            st.markdown("### 📥 Download Full Report")
+
             # CSV Download
             csv = results_df.to_csv(index=False).encode('utf-8')
-            st.download_button("⬇️ Download Full Results as CSV", csv, "gsc_analysis_results.csv", "text/csv")
+            st.download_button("⬇️ Download CSV (Basic)", csv, "gsc_analysis.csv", "text/csv")
 
-            # URL Selection
-            st.markdown("### 🔍 Select a URL for Detailed Analysis")
-            selected_url = st.selectbox("Choose a URL", results_df["URL"].unique())
+            # Excel Download with emojis preserved
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                results_df.to_excel(writer, index=False, sheet_name='Analysis')
+            excel_data = output.getvalue()
 
+            st.download_button(
+                "📥 Download Excel (Recommended)",
+                excel_data,
+                "gsc_analysis.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
+            # === URL Drilldown ===
+            st.markdown("### 🔍 Individual URL Insight")
+            selected_url = st.selectbox("Choose a URL to inspect", results_df["URL"].unique())
             selected_row = results_df[results_df["URL"] == selected_url].iloc[0]
 
-            st.markdown(f"#### 📍 Analysis for: `{selected_url}`")
+            st.markdown(f"#### 🔎 Detailed Analysis for `{selected_url}`")
             for metric in ["Clicks", "Impressions", "CTR (%)", "Position"]:
-                st.markdown(f"- **{metric}**: {selected_row[f'{metric} M1']} ➡️ {selected_row[f'{metric} M2']} | Δ {selected_row[f'{metric} Δ']} | {selected_row[f'{metric} %']}% — {selected_row[f'{metric} Insight']}")
+                st.markdown(
+                    f"- **{metric}**: {selected_row[f'{metric} M1']} ➡️ {selected_row[f'{metric} M2']} | Δ {selected_row[f'{metric} Δ']} | {selected_row[f'{metric} %']}% — {selected_row[f'{metric} Insight']}"
+                )
 
             if selected_row["AI Overview"] != "—":
                 st.warning(selected_row["AI Overview"])
             else:
                 st.info("No signs of AI Overview impact.")
 
-            st.success("✅ Analysis complete. Choose another URL or upload a new file.")
+            st.success("✅ Done. You can select another URL or upload a new file.")
 
     except Exception as e:
         st.error(f"❌ Error reading file: {e}")
