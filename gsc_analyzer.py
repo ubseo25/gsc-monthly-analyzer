@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-st.set_page_config(page_title="📊 Search Console Analyzer ", layout="wide")
+st.set_page_config(page_title="📊 Search Console Analyzer", layout="wide")
 
 st.title("📊 Google Search Console Analyzer (Updated by UB)")
 
@@ -10,10 +10,10 @@ st.markdown("""
 Upload your monthly GSC data in **Excel format** with the following columns:
 
 - `URL`
-- `Current Month Clicks`, `Previous Month Clicks`
-- `Current Month Impr`, `Previous Month Impr`
-- `Current Month CTR`, `Previous Month CTR`
-- `Current Month Pos`, `Previous Month Pos`
+- `Previous Month Clicks`, `Current Month Clicks`
+- `Previous Month Impr`, `Current Month Impr`
+- `Previous Month CTR`, `Current Month CTR`
+- `Previous Month Pos`, `Current Month Pos`
 
 🧠 This tool analyzes changes, explains trends, and detects possible **AI Overview** effects.
 """)
@@ -22,14 +22,14 @@ Upload your monthly GSC data in **Excel format** with the following columns:
 st.markdown("### 📑 Required Excel Format Example")
 sample_data = {
     "URL": ["https://example.com/page1"],
-    "Current Month Clicks": [1200],
-    "Previous Month Clicks": [1450],
-    "Current Month Impr": [10000],
-    "Previous Month Impr": [11500],
-    "Current Month CTR": ["12.0%"],
-    "Previous Month CTR": ["12.6%"],
-    "Current Month Pos": [8.4],
-    "Previous Month Pos": [7.9],
+    "Previous Month Clicks": [1200],
+    "Current Month Clicks": [1450],
+    "Previous Month Impr": [10000],
+    "Current Month Impr": [11500],
+    "Previous Month CTR": ["12.0%"],
+    "Current Month CTR": ["12.6%"],
+    "Previous Month Pos": [8.4],
+    "Current Month Pos": [7.9],
 }
 st.dataframe(pd.DataFrame(sample_data))
 st.info("📌 Make sure your file has **exact column names** and values formatted like above.")
@@ -37,22 +37,22 @@ st.info("📌 Make sure your file has **exact column names** and values formatte
 file = st.file_uploader("📂 Upload Excel File", type=["xlsx"])
 
 
-def calc_change(v2, v1, is_percentage=False, is_position=False):
+def calc_change(v1, v2, is_percentage=False, is_position=False):
     try:
         if is_percentage:
-            v2 = float(str(v2).strip('%'))
             v1 = float(str(v1).strip('%'))
+            v2 = float(str(v2).strip('%'))
         else:
-            v2 = float(v2)
             v1 = float(v1)
+            v2 = float(v2)
 
-        if is_position and v1 == 0:
-            return v2, 0, float('inf'), -100
+        if is_position and v2 == 0:
+            return v1, 0, float('inf'), -100
 
         delta = v2 - v1
-        pct_change = ((v2 - v1) / v1) * 100 if v2 != 0 else 0
+        pct_change = ((v2 - v1) / v1) * 100 if v1 != 0 else 0
         if is_position:
-            pct_change = ((v1 - v2) / v1) * 100 if v2 != 0 else 0
+            pct_change = ((v1 - v2) / v1) * 100 if v1 != 0 else 0
 
         return round(v1, 2), round(v2, 2), round(delta, 2), round(pct_change, 1)
     except:
@@ -85,10 +85,10 @@ if file:
         df = pd.read_excel(file)
 
         required_cols = [
-            "URL", "Current Month Clicks", "Previous Month Clicks",
-            "Current Month Impr", "Previous Month Impr",
-            "Current Month CTR", "Previous Month CTR",
-            "Current Month Pos", "Previous Month Pos"
+            "URL", "Previous Month Clicks", "Current Month Clicks",
+            "Previous Month Impr", "Current Month Impr",
+            "Previous Month CTR", "Current Month CTR",
+            "Previous Month Pos", "Current Month Pos"
         ]
 
         if not all(col in df.columns for col in required_cols):
@@ -100,14 +100,14 @@ if file:
             for idx, row in df.iterrows():
                 result = {"URL": row["URL"]}
                 metrics = {
-                    "Clicks": ("Current Month Clicks", "Previous Month Clicks", True, False, False),
-                    "Impressions": ("Current Month Impr", "Previous Month Impr", True, False, False),
-                    "CTR (%)": ("Current Month CTR", "Previous Month CTR", True, True, False),
-                    "Position": ("Current Month Pos", "Previous Month Pos", False, False, True)
+                    "Clicks": ("Previous Month Clicks", "Current Month Clicks", True, False, False),
+                    "Impressions": ("Previous Month Impr", "Current Month Impr", True, False, False),
+                    "CTR (%)": ("Previous Month CTR", "Current Month CTR", True, True, False),
+                    "Position": ("Previous Month Pos", "Current Month Pos", False, False, True)
                 }
 
                 for label, (c1, c2, high_better, pct, pos) in metrics.items():
-                    v2, v1, delta, perc = calc_change(row[c1], row[c2], pct, pos)
+                    v1, v2, delta, perc = calc_change(row[c1], row[c2], pct, pos)
                     result[f"{label} PM"] = v1
                     result[f"{label} CM"] = v2
                     result[f"{label} Δ"] = delta
@@ -123,10 +123,10 @@ if file:
                         result[f"{label} Insight"] = insight
 
                 result["AI Overview"] = ai_impact_logic(
-                    row["Current Month Clicks"], row["Previous Month Clicks"],
-                    row["Current Month Pos"], row["Previous Month Pos"],
-                    row["Current Month CTR"], row["Previous Month CTR"],
-                    row["Current Month Impr"], row["Previous Month Impr"]
+                    row["Previous Month Clicks"], row["Current Month Clicks"],
+                    row["Previous Month Pos"], row["Current Month Pos"],
+                    row["Previous Month CTR"], row["Current Month CTR"],
+                    row["Previous Month Impr"], row["Current Month Impr"]
                 )
                 output_data.append(result)
 
