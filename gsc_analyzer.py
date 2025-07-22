@@ -50,9 +50,9 @@ def calc_change(v1, v2, is_percentage=False, is_position=False):
             return v1, 0, float('inf'), -100
 
         delta = v1 - v2
-        pct_change = ((v1 - v2) / v2) * 100 if v1 != 0 else 0
+        pct_change = ((v1 - v2) / v2) * 100 if v2 != 0 else 0
         if is_position:
-            pct_change = ((v2 - v1) / v2) * 100 if v1 != 0 else 0
+            pct_change = ((v2 - v1) / v2) * 100 if v2 != 0 else 0
 
         return round(v2, 2), round(v1, 2), round(delta, 2), round(pct_change, 1)
     except:
