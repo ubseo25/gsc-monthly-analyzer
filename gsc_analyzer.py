@@ -4,7 +4,7 @@ from io import BytesIO
 
 st.set_page_config(page_title="📊 Search Console Analyzer ", layout="wide")
 
-st.title("📊 Google Search Console Analyzer Analyzer")
+st.title("📊 Google Search Console Analyzer")
 
 st.markdown("""
 Upload your monthly GSC data in **Excel format** with the following columns:
