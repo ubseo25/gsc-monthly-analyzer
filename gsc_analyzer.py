@@ -108,8 +108,8 @@ if file:
 
                 for label, (c1, c2, high_better, pct, pos) in metrics.items():
                     v1, v2, delta, perc = calc_change(row[c1], row[c2], pct, pos)
-                    result[f"{label} CM"] = v1
-                    result[f"{label} PM"] = v2
+                    result[f"{label} PM"] = v1
+                    result[f"{label} CM"] = v2
                     result[f"{label} Δ"] = delta
                     result[f"{label} %"] = perc
 
@@ -152,7 +152,7 @@ if file:
             st.markdown(f"#### 📊 `{selected_url}`")
             for metric in ["Clicks", "Impressions", "CTR (%)", "Position"]:
                 st.markdown(
-                    f"- **{metric}**: {r[f'{metric} CM']} ➡️ {r[f'{metric} PM']} | Δ {r[f'{metric} Δ']} | {r[f'{metric} %']}% — {r[f'{metric} Insight']}"
+                    f"- **{metric}**: {r[f'{metric} PM']} ➡️ {r[f'{metric} CM']} | Δ {r[f'{metric} Δ']} | {r[f'{metric} %']}% — {r[f'{metric} Insight']}"
                 )
 
             if r["AI Overview"] != "—":
