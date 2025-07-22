@@ -37,7 +37,7 @@ st.info("📌 Make sure your file has **exact column names** and values formatte
 file = st.file_uploader("📂 Upload Excel File", type=["xlsx"])
 
 
-def calc_change(v1, v2, is_percentage=False, is_position=False):
+def calc_change(v2, v1, is_percentage=False, is_position=False):
     try:
         if is_percentage:
             v2 = float(str(v2).strip('%'))
@@ -46,15 +46,15 @@ def calc_change(v1, v2, is_percentage=False, is_position=False):
             v2 = float(v2)
             v1 = float(v1)
 
-        if is_position and v2 == 0:
-            return v1, 0, float('inf'), -100
+        if is_position and v1 == 0:
+            return v2, 0, float('inf'), -100
 
         delta = v1 - v2
         pct_change = ((v1 - v2) / v2) * 100 if v2 != 0 else 0
         if is_position:
             pct_change = ((v2 - v1) / v2) * 100 if v2 != 0 else 0
 
-        return round(v1, 2), round(v2, 2), round(delta, 2), round(pct_change, 1)
+        return round(v2, 2), round(v1, 2), round(delta, 2), round(pct_change, 1)
     except:
         return None, None, None, None
 
@@ -107,14 +107,14 @@ if file:
                 }
 
                 for label, (c1, c2, high_better, pct, pos) in metrics.items():
-                    v1, v2, delta, perc = calc_change(row[c1], row[c2], pct, pos)
-                    result[f"{label} PM"] = v1
-                    result[f"{label} CM"] = v2
+                    v2, v1, delta, perc = calc_change(row[c1], row[c2], pct, pos)
+                    result[f"{label} PM"] = v2
+                    result[f"{label} CM"] = v1
                     result[f"{label} Δ"] = delta
                     result[f"{label} %"] = perc
 
-                    if v1 is not None:
-                        if pos and v2 == 0:
+                    if v2 is not None:
+                        if pos and v1 == 0:
                             insight = "❌ Disappeared"
                         elif pos:
                             insight = "📈 Improved" if delta < 0 else "🔻 Declined" if delta > 0 else "➖ No Change"
