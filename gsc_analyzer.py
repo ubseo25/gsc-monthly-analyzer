@@ -49,12 +49,12 @@ def calc_change(v1, v2, is_percentage=False, is_position=False):
         if is_position and v2 == 0:
             return v1, 0, float('inf'), -100
 
-        delta = v2 - v1
-        pct_change = ((v2 - v1) / v1) * 100 if v1 != 0 else 0
+        delta = v1 - v2
+        pct_change = ((v1 - v2) / v2) * 100 if v1 != 0 else 0
         if is_position:
-            pct_change = ((v1 - v2) / v1) * 100 if v1 != 0 else 0
+            pct_change = ((v2 - v1) / v2) * 100 if v1 != 0 else 0
 
-        return round(v1, 2), round(v2, 2), round(delta, 2), round(pct_change, 1)
+        return round(v2, 2), round(v1, 2), round(delta, 2), round(pct_change, 1)
     except:
         return None, None, None, None
 
@@ -152,7 +152,7 @@ if file:
             st.markdown(f"#### 📊 `{selected_url}`")
             for metric in ["Clicks", "Impressions", "CTR (%)", "Position"]:
                 st.markdown(
-                    f"- **{metric}**: {r[f'{metric} M1']} ➡️ {r[f'{metric} M2']} | Δ {r[f'{metric} Δ']} | {r[f'{metric} %']}% — {r[f'{metric} Insight']}"
+                    f"- **{metric}**: {r[f'{metric} CM']} ➡️ {r[f'{metric} PM']} | Δ {r[f'{metric} Δ']} | {r[f'{metric} %']}% — {r[f'{metric} Insight']}"
                 )
 
             if r["AI Overview"] != "—":
