@@ -114,7 +114,7 @@ if file:
                     result[f"{label} %"] = perc
 
                     if v1 is not None:
-                        if pos and v1 == 0:
+                        if pos and v2 == 0:
                             insight = "❌ Disappeared"
                         elif pos:
                             insight = "📈 Improved" if delta < 0 else "🔻 Declined" if delta > 0 else "➖ No Change"
