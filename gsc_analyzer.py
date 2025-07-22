@@ -113,7 +113,7 @@ if file:
                     result[f"{label} Δ"] = delta
                     result[f"{label} %"] = perc
 
-                    if v2 is not None:
+                    if v1 is not None:
                         if pos and v1 == 0:
                             insight = "❌ Disappeared"
                         elif pos:
