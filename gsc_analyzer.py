@@ -108,8 +108,8 @@ if file:
 
                 for label, (c1, c2, high_better, pct, pos) in metrics.items():
                     v2, v1, delta, perc = calc_change(row[c1], row[c2], pct, pos)
-                    result[f"{label} PM"] = v2
-                    result[f"{label} CM"] = v1
+                    result[f"{label} PM"] = v1
+                    result[f"{label} CM"] = v2
                     result[f"{label} Δ"] = delta
                     result[f"{label} %"] = perc
 
