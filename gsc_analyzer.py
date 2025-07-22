@@ -54,7 +54,7 @@ def calc_change(v1, v2, is_percentage=False, is_position=False):
         if is_position:
             pct_change = ((v2 - v1) / v2) * 100 if v2 != 0 else 0
 
-        return round(v2, 2), round(v1, 2), round(delta, 2), round(pct_change, 1)
+        return round(v1, 2), round(v2, 2), round(delta, 2), round(pct_change, 1)
     except:
         return None, None, None, None
 
