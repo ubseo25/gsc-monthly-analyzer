@@ -40,14 +40,14 @@ file = st.file_uploader("📂 Upload Excel File", type=["xlsx"])
 def calc_change(v1, v2, is_percentage=False, is_position=False):
     try:
         if is_percentage:
-            v1 = float(str(v1).strip('%'))
-            v2 = float(str(v2).strip('%'))
+            v2 = float(str(v1).strip('%'))
+            v1 = float(str(v2).strip('%'))
         else:
-            v1 = float(v1)
-            v2 = float(v2)
+            v2 = float(v1)
+            v1 = float(v2)
 
-        if is_position and v2 == 0:
-            return v1, 0, float('inf'), -100
+        if is_position and v1 == 0:
+            return v2, 0, float('inf'), -100
 
         delta = v1 - v2
         pct_change = ((v1 - v2) / v2) * 100 if v2 != 0 else 0
