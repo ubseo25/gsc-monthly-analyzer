@@ -23,11 +23,11 @@ A Streamlit app to **compare monthly Google Search Console data**, highlight per
 1. Prepare your Excel file with these columns:
 
 ```
-URL  
-Month 1 Clicks, Month 2 Clicks  
-Month 1 Impr, Month 2 Impr  
-Month 1 CTR, Month 2 CTR  
-Month 1 Pos, Month 2 Pos
+URL
+Previous Month Clicks, Current Month Clicks
+Previous Month Impr, Current Month Impr
+Previous Month CTR, Current Month CTR
+Previous Month Pos, Current Month Pos
 ```
 
 2. Upload it via the app
@@ -49,9 +49,9 @@ Month 1 Pos, Month 2 Pos
 
 ---
 
-## 👨‍💻 Created by [Amal Alexander](https://www.linkedin.com/in/amal-alexander-305780131/)
+## 👨‍💻 Updated by [UB SEO]([https://in.linkedin.com/in/udgith-bhatt/])
 
-Passionate about SEO, automation, and building tools that make data actionable.
+Passionate about Technical SEO, AI automation, and strategy that make data actionable.
 
 Feel free to connect or drop a message!
 
